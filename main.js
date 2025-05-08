@@ -4,7 +4,7 @@ import qrcode from "qrcode-terminal";
 import axios from "axios";
 
 dotenv.config();
-const { Client, NoAuth } = WWJS;
+const { Client, NoAuth, MessageTypes } = WWJS;
 const API_URL = 'http://localhost:8000/api/message';
 const API_TOKEN = process.env.API_TOKEN;
 const API_AUTHORIZATION_HEADER = {
@@ -30,7 +30,7 @@ client.on('qr', qr => {
 });
 
 client.on('message_create', message => {
-    if (!message.fromMe) {
+    if (!message.fromMe && message.type === MessageTypes.TEXT ) {
         console.log("New message from " + message.from)
 
         const body = {
