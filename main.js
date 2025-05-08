@@ -29,30 +29,40 @@ client.on('qr', qr => {
     qrcode.generate(qr, { small: true });
 });
 
-client.on('message_create', message => {
-    if (!message.fromMe && message.type === MessageTypes.TEXT ) {
+client.on('message_create', async message => {
+    const chat = await message.getChat();
+
+    if (!chat.isGroup && !message.fromMe && message.type === MessageTypes.TEXT) {
         console.log("New message from " + message.from)
 
         const body = {
             from: message.from,
             message: message.body,
         };
-        axios.post(
-            API_URL,
-            body,
-            API_AUTHORIZATION_HEADER
-        ).then(response => {
+
+        try {
+            const response = await axios.post(
+                API_URL,
+                body,
+                API_AUTHORIZATION_HEADER
+            );
+
             if (response.data.message) {
                 console.log(`Sending answer to ${message.from}`, response.data.message);
-                client.sendMessage(message.from, response.data.message);
+                await client.sendMessage(message.from, response.data.message);
+
                 return;
             }
 
             console.log("No answer available");
-        }, error => {
-            console.log({error});
-        })
+        } catch (e) {
+            console.error({ error: e });
+        }
     }
+});
+
+client.on('disconnected', () => {
+    console.info("Client was disconnected");
 });
 
 client.initialize();
