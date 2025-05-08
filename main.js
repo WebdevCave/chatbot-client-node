@@ -36,7 +36,8 @@ client.on('message_create', async message => {
         console.log("New message from " + message.from)
 
         const body = {
-            from: message.from,
+            to: '+' + message.to.replace(/\D/g, ''),
+            from: '+' + message.from.replace(/\D/g, ''),
             message: message.body,
         };
 
@@ -63,6 +64,7 @@ client.on('message_create', async message => {
 
 client.on('disconnected', () => {
     console.info("Client was disconnected");
+    client.close()
 });
 
 client.initialize();
