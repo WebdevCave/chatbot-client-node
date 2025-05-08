@@ -26,6 +26,7 @@ client.on('ready', () => {
 });
 
 client.on('qr', qr => {
+    console.clear();
     qrcode.generate(qr, { small: true });
 });
 
