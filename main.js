@@ -5,7 +5,7 @@ import axios from "axios";
 
 dotenv.config();
 const { Client, NoAuth, MessageTypes } = WWJS;
-const API_URL = 'http://localhost:8000/api/message';
+const API_URL = 'http://localhost:8000/api/attendant-events/';
 const API_TOKEN = process.env.API_TOKEN;
 const API_AUTHORIZATION_HEADER = {
     headers: {
@@ -21,13 +21,23 @@ const client = new Client({
     authStrategy: new NoAuth(),
 });
 
-client.on('ready', () => {
+client.on('ready', async () => {
     console.log('Client is ready!');
+    await axios.post(
+      API_URL + 'device-connected',
+      {},
+      API_AUTHORIZATION_HEADER
+    );
 });
 
-client.on('qr', qr => {
-    console.clear();
+client.on('qr', async qr => {
+    console.log("New qrcode generated")
     qrcode.generate(qr, { small: true });
+    await axios.post(
+      API_URL + 'qrcode-generated',
+      {qrcode: qr},
+      API_AUTHORIZATION_HEADER
+    );
 });
 
 client.on('message_create', async message => {
@@ -44,7 +54,7 @@ client.on('message_create', async message => {
 
         try {
             const response = await axios.post(
-                API_URL,
+                API_URL + 'new-message',
                 body,
                 API_AUTHORIZATION_HEADER
             );
@@ -65,7 +75,6 @@ client.on('message_create', async message => {
 
 client.on('disconnected', () => {
     console.info("Client was disconnected");
-    client.close()
 });
 
 client.initialize();
